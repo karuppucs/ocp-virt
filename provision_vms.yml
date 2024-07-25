@@ -1,11 +1,20 @@
 ---
 - name: Deploy VMs
   hosts: localhost
+  vars_prompt:
+    - name: vm_password
+      prompt: 'what is the password to setup'
+    - name: vm_create_ns
+      prompt: 'Create the OpenShift Cluster NameSpace'
+    - name: vm_role
+      prompt: 'Enter the role of VM'
+    - name: vm_env
+      prompt: 'Enter the VM type of environment'
   tasks:
 
-    - name: Create the 'linuxvm' namespace
+    - name: Create the '{{ vm_create_ns }}'  namespace
       kubernetes.core.k8s:
-        name: linuxvm
+        name: "{{ vm_create_ns }}"
         kind: Namespace
         api_version: v1
         state: present
@@ -94,8 +103,6 @@
                             sudo: ['ALL=(ALL) NOPASSWD: ALL']
                             groups: wheel
                             shell: /bin/bash
-                            ssh_authorized_keys:
-                              - "{{ ssh_public_key }}"
                             passwd: "{{ vm_password }}"
                             lock_passwd: false
                         chpasswd:
@@ -104,9 +111,4 @@
                           expire: False
                     name: cloudinitdisk
       loop:
-        - { role: "web", env: "prod", id: 1 }
-        - { role: "app", env: "prod", id: 2 }
-        - { role: "db", env: "prod", id: 3 }
-        - { role: "web", env: "dev", id: 4 }
-        - { role: "app", env: "dev", id: 5 }
-        - { role: "db", env: "dev", id: 6 }
+        - { role: "{{ vm_role }}", env: "{{ vm_env }}", id: 1 }
