@@ -9,7 +9,7 @@
         namespace: "{{ provider_namespace }}"
       spec:
         secret:
-          name: "{{ vmware_credentials }}"
+          name: "{{ vmware-credentials }}"
           namespace: "{{ provider_namespace }}"
         settings:
           vddkInitImage: 'quay.io/karuppus/openshift:latest'
