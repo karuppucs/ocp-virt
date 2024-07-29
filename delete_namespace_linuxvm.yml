@@ -2,7 +2,6 @@
 - name: Remove VMs
   hosts: localhost
   tasks:
-
     - name: Delete the "{{ delete_ns }}" namespace
       kubernetes.core.k8s:
         name: "{{ delete_ns }}"
