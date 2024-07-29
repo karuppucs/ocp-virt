@@ -1,1 +1,17 @@
+- name: Fetch Inventory from OpenShift Virtualization
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Gather VM details
+      k8s_info:
+        api_version: kubevirt.io/v1
+        kind: VirtualMachineInstance
+      register: vmi_info
 
+    - name: Extract VM names
+      set_fact:
+        vm_names: "{{ vmi_info.resources | map(attribute='metadata.name') | list }}"
+
+    - name: Print VM names
+      debug:
+        var: vm_names
