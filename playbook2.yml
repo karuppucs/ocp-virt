@@ -1,0 +1,7 @@
+- name: PLaybook to check set_stats
+  hosts: localhost
+  gather_facts: true
+  tasks:   
+  - name: content of set_stats
+    debug:
+       msg: "{{ test_stat }}"
