@@ -1,0 +1,20 @@
+- name: PLaybook to generate set_stats
+  hosts: localhost
+  gather_facts: true
+  tasks:
+  - name: check google
+    uri:
+      url: http://www.google.com
+      return_content: yes
+    register: this
+   
+   - set_fact:  
+        this_local: "{{ this.url }}"   
+
+   - set_stats:
+        data:
+          test_stat: "{{ this_local }}"
+
+    - name: debug set fact
+      debug:
+         msg: "{{ this.url}}"
