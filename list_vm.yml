@@ -15,7 +15,3 @@
     - name: Print VM names
       debug:
         var: vm_names
-    - name: Set a custom stat
-      set_stat:
-        data:
-          my_stat: "vm_names"
