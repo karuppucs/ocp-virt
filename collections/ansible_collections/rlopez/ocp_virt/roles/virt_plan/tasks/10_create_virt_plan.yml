@@ -45,57 +45,16 @@
 #  ansible.builtin.set_fact:
 #    portgroup_id: "{{ my_portgroup.value[0].network }}"
 
-- name: Get distributed port groups (filter DISTRIBUTED_PORTGROUP)
+- name: Get distributed port groups in CaasLab datacenter
   vmware.vmware_rest.vcenter_network_info:
+    datacenter_name: "CaasLab"
     filter_types: DISTRIBUTED_PORTGROUP
-  register: my_portgroup
-  failed_when: my_portgroup is failed
+    validate_certs: no
+  register: dc_portgroups
 
-- name: Debug raw portgroup result (show first item for inspection)
-  ansible.builtin.debug:
-    msg: >-
-      found {{ my_portgroup.value | default([]) | length }} distributed portgroups.
-      sample: {{ (my_portgroup.value | default([]) | first) | default({}) | to_nice_json }}
-  when: my_portgroup.value is defined
-
-- name: Ensure the portgroup list is not empty
-  ansible.builtin.fail:
-    msg: "No distributed portgroups found (filter_types=DISTRIBUTED_PORTGROUP)."
-  when: my_portgroup.value is not defined or (my_portgroup.value | length) == 0
-
-- name: Set desired portgroup name
-  ansible.builtin.set_fact:
-    desired_portgroup_name: "AppIn Network"   # <-- change to "segment-migrating-to-ocpvirt" if that's the actual name
-
-- name: Find the portgroup item by name
-  ansible.builtin.set_fact:
-    matched_portgroups: "{{ my_portgroup.value | selectattr('name','equalto', desired_portgroup_name) | list }}"
-
-- name: Fail if named portgroup not found
-  ansible.builtin.fail:
-    msg: "Portgroup '{{ desired_portgroup_name }}' not found in vCenter (distributed portgroups)."
-  when: matched_portgroups | length == 0
-
-- name: Capture the distributed portgroup id to make network mappings
-  ansible.builtin.set_fact:
-    portgroup_item: "{{ matched_portgroups[0] }}"
-    portgroup_id: >-
-      {{
-        (matched_portgroups[0].network
-         if (matched_portgroups[0] is defined and 'network' in matched_portgroups[0])
-         else (matched_portgroups[0].moref
-               if 'moref' in matched_portgroups[0]
-               else (matched_portgroups[0].object_id
-                     if 'object_id' in matched_portgroups[0] else '')) )
-      }}
-
-- name: Show captured portgroup id and item
-  ansible.builtin.debug:
-    msg:
-      - "Selected portgroup name: {{ portgroup_item.name }}"
-      - "Portgroup id field used: {{ 'network' if 'network' in portgroup_item else ('moref' if 'moref' in portgroup_item else 'object_id' if 'object_id' in portgroup_item else 'unknown') }}"
-      - "Portgroup id: {{ portgroup_id }}"
-
+- debug:
+    msg: "found {{ dc_portgroups.value | default([]) | length }} in CaasLab. sample: {{ (dc_portgroups.value | default([]) | first) | default({}) | to_nice_json }}"
+    
 - name: Create or update a NetworkMap
   kubernetes.core.k8s:
     state: present
