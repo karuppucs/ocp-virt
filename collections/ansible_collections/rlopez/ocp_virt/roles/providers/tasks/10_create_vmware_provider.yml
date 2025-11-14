@@ -12,7 +12,8 @@
           name: "{{ vmware_credentials }}"
           namespace: "{{ provider_namespace }}"
         settings:
-          vddkInitImage: 'image-registry.openshift-image-registry.svc:5000/openshift/vddk:latest'
+        #  vddkInitImage: 'image-registry.openshift-image-registry.svc:5000/openshift/vddk:latest'
+          vddkInitImage: 'quay.io/rhn_support_dpateriy/vddk:latest'
         type: vsphere
         url: 'https://{{ vmware_host }}/sdk'
 
