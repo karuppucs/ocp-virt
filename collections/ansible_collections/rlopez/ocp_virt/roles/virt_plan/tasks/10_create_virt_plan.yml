@@ -44,16 +44,6 @@
 #- name: Capture the distrivuted portgroup id to make network mappings
 #  ansible.builtin.set_fact:
 #    portgroup_id: "{{ my_portgroup.value[0].network }}"
-
-- name: Get distributed port groups in CaasLab datacenter
-  vmware.vmware_rest.vcenter_network_info:
-    datacenter_name: "CaasLab"
-    filter_types: DISTRIBUTED_PORTGROUP
-    validate_certs: no
-  register: dc_portgroups
-
-- debug:
-    msg: "found {{ dc_portgroups.value | default([]) | length }} in CaasLab. sample: {{ (dc_portgroups.value | default([]) | first) | default({}) | to_nice_json }}"
     
 - name: Create or update a NetworkMap
   kubernetes.core.k8s:
@@ -69,7 +59,8 @@
           - destination:
               type: pod
             source:
-              id: "{{ portgroup_id }}"
+              id: network-17
+ #             id: "{{ portgroup_id }}"
         provider:
           destination:
             name: host
