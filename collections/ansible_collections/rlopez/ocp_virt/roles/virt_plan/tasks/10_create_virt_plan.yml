@@ -59,7 +59,7 @@
           - destination:
               type: pod
             source:
-              id: DPG_VLAN_712
+              id: dvportgroup-2006
  #             id: "{{ portgroup_id }}"
         provider:
           destination:
