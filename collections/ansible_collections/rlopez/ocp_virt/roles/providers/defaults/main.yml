@@ -1,6 +1,6 @@
 ---
 # defaults file for providers
 
-provider_name: "vmware"
+provider_name: "dellpowerflex"
 provider_namespace: "openshift-mtv"
 vmware_credentials: "dellpowerflex-vmware"
