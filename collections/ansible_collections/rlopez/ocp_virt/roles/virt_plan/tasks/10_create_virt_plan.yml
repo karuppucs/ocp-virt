@@ -115,6 +115,8 @@
         vms:
           - hooks: []
             id: vm-3005
+          - hooks: []
+            id: vm-3002
         warm: false
 
 - name: Create a Migration manifest to run the Plan CR
