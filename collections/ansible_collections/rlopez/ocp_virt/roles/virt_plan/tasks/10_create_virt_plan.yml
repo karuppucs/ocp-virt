@@ -112,7 +112,9 @@
             name: vmware
             namespace: "{{ migration_namespace }}"
         targetNamespace: "{{ migration_target_namespace }}"
-        vms: "{{ user_selected_vm_names }}"
+        vms:
+          - hooks: []
+            id: vm-3005
         warm: false
 
 - name: Create a Migration manifest to run the Plan CR
