@@ -1,6 +1,6 @@
 ---
 - name: Build a list of all the folders
-  vmware.vmware_rest.vcenter_folder_info:
+  community.vmware.vmware_folder_info:
   register: all_folders
 
 - name: Filter VM folders
