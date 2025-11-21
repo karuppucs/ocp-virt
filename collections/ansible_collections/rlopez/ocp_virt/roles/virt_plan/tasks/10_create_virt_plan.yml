@@ -1,81 +1,4 @@
 ---
-- name: Discover datacenters if datacenter_name not set
-  community.vmware.vmware_datacenter_info:
-    validate_certs: "{{ validate_certs | default(false) }}"
-  register: _dcs
-  when: datacenter_name is not defined
-
-- name: Set datacenter_name to first datacenter if not provided
-  set_fact:
-    datacenter_name: "{{ _dcs.datacenters[0].datacenter }}"
-  when:
-    - datacenter_name is not defined
-    - _dcs.datacenters is defined
-    - _dcs.datacenters | length > 0
-
-- name: Build a list of all the folders (vCenter)
-  community.vmware.vmware_folder_info:
-    datacenter: "{{ datacenter_name }}"
-    validate_certs: "{{ validate_certs | default(false) }}"
-  register: all_folders
-
-- name: Filter VM folders
-  ansible.builtin.set_fact:
-    vm_folders: "{{ all_folders.folders | selectattr('type', 'equalto', 'VIRTUAL_MACHINE') | list }}"
-
-- name: Initialize vm_folders_with_vms accumulator
-  set_fact:
-    vm_folders_with_vms: []
-
-- name: Check each VM folder for VMs (using community.vmware.vmware_vm_info)
-  when: vm_folders is defined and vm_folders | length > 0
-  loop: "{{ vm_folders }}"
-  loop_control:
-    label: "{{ item.name }} ({{ item.folder }})"
-  block:
-    - name: Get VMs in folder {{ item.name }}
-      community.vmware.vmware_vm_info:
-        datacenter: "{{ datacenter_name }}"
-        # folder may be folder name or full path; using full path reduces ambiguity:
-        folder: "/{{ datacenter_name }}/vm/{{ item.name }}"
-        validate_certs: "{{ validate_certs | default(false) }}"
-      register: vm_query
-
-    - name: Append folder vm result if non-empty
-      set_fact:
-        vm_folders_with_vms: >-
-          {{ vm_folders_with_vms + [ { 'folder': item.folder, 'folder_name': item.name, 'vms': vm_query.virtual_machines | default([]) } ] }}
-      when: (vm_query.virtual_machines | default([])) | length > 0
-
-- name: Build flattened list of all VMs found
-  set_fact:
-    all_vms: "{{ vm_folders_with_vms | map(attribute='vms') | list | flatten(1) }}"
-  when: vm_folders_with_vms | length > 0
-
-- name: Display VM names and IDs
-  ansible.builtin.debug:
-    msg: "VM Name: {{ item.name }}, VM ID: {{ item.vm | default(item.instance_uuid) }}"
-  loop: "{{ all_vms | default([]) }}"
-  loop_control:
-    label: "{{ item.name | default('unknown') }}"
-  when: all_vms | length > 0
-
-- name: Collect VM names and IDs
-  ansible.builtin.set_fact:
-    vm_name_id_pairs: "{{ vm_name_id_pairs | default([]) + [ {'name': item.name, 'vm': (item.vm | default(item.instance_uuid)) } ] }}"
-  loop: "{{ all_vms | default([]) }}"
-  when: item.name is defined
-
-- name: Prepare VMs for Plan spec
-  ansible.builtin.set_fact:
-    vms_for_plan_spec: >-
-      {{ vms_for_plan_spec | default([]) +
-         [ {'hooks': [], 'id': vm_id.vm} ] }}
-  loop: "{{ vm_name_id_pairs | default([]) }}"
-  loop_control:
-    loop_var: vm_id
-  when: (user_selected_vm_names | default('')) == '' or (vm_id.name in (user_selected_vm_names.split('\n')))
-
 #- name: Get information for the distributed port group 'segment-migrating-to-ocpvirt'
 #  vmware.vmware_rest.vcenter_network_info:
 #    filter_types: DISTRIBUTED_PORTGROUP
@@ -192,7 +115,7 @@
             name: vmware
             namespace: "{{ migration_namespace }}"
         targetNamespace: "{{ migration_target_namespace }}"
-        vms: "{{ vms_for_plan_spec }}"
+        vms: redhat3.openshiftlab.local
         warm: false
 
 - name: Create a Migration manifest to run the Plan CR
