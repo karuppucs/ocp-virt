@@ -32,9 +32,6 @@
             name: vmware
             namespace:  "{{ migration_namespace }}" #openshift-mtv
 
-- name: Build a list of all the datastores
-  vmware.vmware_rest.vcenter_datastore_info:
-  register: all_the_datastores
 
 # - name: Capture the datastore id
 #   set_fact:
